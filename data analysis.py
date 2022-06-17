@@ -30,3 +30,35 @@ tutores = {355074062, 276365414, 395739605}
 df = df[df.apply(lambda x: x['remetente'] not in tutores, axis = 1)]
 
 df.head(3)
+
+
+#Atributos de alunos:
+#Explicitos:
+
+#Cursos
+#Turmas
+#Gênero
+#Cidade, Estado, País
+#Implícitos
+
+#Número de mensagens
+#Média/Std de mensagens por dia (nos dias que mandou mensagem)
+#Média/Std de intervalo de tempo entre as mensagens (nos dias que mandou mensagem)
+#Texto das mensagens
+
+students_set = df[df['autor_da_mensagem']=='STUART']['destinatario'].unique()
+print('total de alunos:',len(students_set))
+
+active_students_set = df[df['autor_da_mensagem']!='STUART']['remetente'].unique()
+print('total de alunos ativos:',len(active_students_set))
+
+df.columns
+explicit_variables=['remetente', 'deficiencia', 'cursos_usuario', 'turmas_usuario', 'genero', 'cidade', 'estado', 'pais']
+df_students = pd.DataFrame()
+for student in active_students_set:
+  student_last_row = df[df['remetente']==student].iloc[-1][explicit_variables].to_frame().transpose()
+  df_students = pd.concat([df_students, student_last_row])
+
+df_students.reset_index(drop=True, inplace = True)
+df_students.dropna(subset=['cursos_usuario'], inplace = True)
+df_students
