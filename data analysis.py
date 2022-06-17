@@ -132,3 +132,67 @@ df_pca['deficiencia'] = df_students.reset_index(drop = True)['deficiencia']
 plt.figure(figsize=(40,15))
 sns.scatterplot(data = df_pca, x = 'x', y ='y', hue = 'deficiencia', s = 100)
 
+#Análise de rede
+#Grafo de alunos: existe uma conexão entre os alunos i e j, se i faz o mesmo curso que j e o peso da conexão é quantidade cursos em comum.
+#Grafo de cursos: existe uma conexão entre os cursos i e j se há um aluno que faz os cursos i e j e o peso da conexão é a quantidade de cursos que eles fazem juntos.
+#Nós com maior centralidade
+
+!pip install pyvis
+from pyvis.network import Network
+
+def create_network(dict_nodes_edges, network_file, display_label = True):
+
+  net = Network(width = '1800px', height = '1000px', notebook = True, directed=False)
+
+  # Create connections between nodes
+  nodes_pairs = []
+  nodes_inserted = set([])
+  for i in dict_nodes_edges:
+    for j in dict_nodes_edges:
+      if (i,j) in nodes_pairs or i==j:
+        continue
+
+      i_edges = dict_nodes_edges[i]
+      j_edges = dict_nodes_edges[j]
+
+      if i not in nodes_inserted:
+        nodes_inserted.add(i)
+        if display_label:
+          net.add_node(i, label = i, title = str(i_edges), value = len(i_edges))
+        else:
+          net.add_node(i, label = '', title = i, value = len(i_edges))        
+
+      if j not in nodes_inserted:
+        nodes_inserted.add(j)
+        if display_label:
+          net.add_node(j, label = j, title = str(j_edges), value = len(j_edges))
+        else:
+          net.add_node(j, label = '', title = j, value = len(j_edges))      
+        
+      intersect = i_edges.intersection(j_edges)
+      if intersect:
+        net.add_edge(i, j)
+
+  net.save_graph(network_file)
+  net.show(network_file)
+
+list_of_sets_courses = [set(c.split(', ')) for c in df_students['cursos_usuario']]
+user_courses = dict(zip(df['remetente'],list_of_sets_courses))
+create_network(user_courses, 'users_network.html')
+
+set_courses = set()
+for c in list_of_sets_courses:
+  set_courses = set_courses.union(c)
+
+def course_in(course, courses_str):
+  courses = set(courses_str.split(', '))
+  return course in courses
+
+
+courses_users = {}
+for c in set_courses:
+  users = df_students[df_students.apply(lambda x: course_in(c, x['cursos_usuario']), axis = 1)]['remetente'].unique()
+  courses_users[c] = set(users)
+
+  create_network(courses_users, 'courses_network.html',True)
+
