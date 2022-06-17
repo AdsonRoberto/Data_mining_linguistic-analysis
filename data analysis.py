@@ -62,3 +62,21 @@ for student in active_students_set:
 df_students.reset_index(drop=True, inplace = True)
 df_students.dropna(subset=['cursos_usuario'], inplace = True)
 df_students
+
+#Variaveis implcitas
+
+students_messages = []
+mean_messages_by_day = []
+for student in df_students['remetente']:
+  messages = df[df['remetente']==student]
+  n_messages = len(messages)
+  students_messages.append(n_messages)
+  frame = '24H'
+  timeseries = messages[messages['autor_da_mensagem']!='STUART'].groupby('data_hora_mensagem').count()['remetente']
+  timeseries = timeseries.resample(frame).sum()
+  mean_messages_by_day.append(timeseries[timeseries.values!=0].mean())
+
+
+df_students['messages_para_stuart'] = students_messages
+df_students['media_mensagens_por_dia_stuart'] = mean_messages_by_day
+
