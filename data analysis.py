@@ -120,3 +120,15 @@ df_studentes_hot_encoded = pd.concat([df_studentes_hot_encoded, genero_hot_encod
 df_studentes_hot_encoded = df_studentes_hot_encoded[df_studentes_hot_encoded.columns[10:]]
 df_studentes_hot_encoded.head()
 
+#reducao de dimensionalidade com pca
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2)
+pca.fit(df_studentes_hot_encoded)
+print(pca.explained_variance_ratio_)
+X = pca.transform(df_studentes_hot_encoded)
+
+df_pca = pd.DataFrame(data=X, columns = ['x', 'y'])
+df_pca['deficiencia'] = df_students.reset_index(drop = True)['deficiencia']
+plt.figure(figsize=(40,15))
+sns.scatterplot(data = df_pca, x = 'x', y ='y', hue = 'deficiencia', s = 100)
+
