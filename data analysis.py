@@ -93,3 +93,30 @@ plt.figure(figsize=(20,10))
 sns.jointplot(data=df_students[df_students['deficiencia']!='Nenhuma'], x="messages_para_stuart", 
               y="media_mensagens_por_dia_stuart", hue = 'deficiencia', height = 10)
 
+#Reducao de dimensionalidade
+
+courses = df_students['cursos_usuario'].unique()
+courses = [set(c.split(', ')) for c in courses]
+set_courses = set()
+for c in courses:
+  set_courses = set_courses.union(c)
+
+courses = list(set_courses)
+
+hot_encoded = np.zeros((len(df_students),len(courses)))
+for i, courses_student in enumerate(df_students['cursos_usuario']):
+  for j, c in enumerate(courses):
+    if c in courses_student:
+      hot_encoded[i][j] = 1
+
+df_courses_hot_encoded = pd.DataFrame(data = hot_encoded, columns = courses)
+df_courses_hot_encoded.reset_index(drop = True,inplace=True)
+
+df_studentes_hot_encoded = pd.concat([df_students.reset_index(drop = True), df_courses_hot_encoded], axis = 1)
+deficiencia_hot_encoded = pd.get_dummies(df_studentes_hot_encoded['deficiencia'])
+genero_hot_encoded = pd.get_dummies(df_studentes_hot_encoded['genero'])
+df_studentes_hot_encoded = pd.concat([df_studentes_hot_encoded, deficiencia_hot_encoded], axis = 1)
+df_studentes_hot_encoded = pd.concat([df_studentes_hot_encoded, genero_hot_encoded], axis = 1)
+df_studentes_hot_encoded = df_studentes_hot_encoded[df_studentes_hot_encoded.columns[10:]]
+df_studentes_hot_encoded.head()
+
