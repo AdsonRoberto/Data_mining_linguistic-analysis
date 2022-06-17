@@ -80,3 +80,16 @@ for student in df_students['remetente']:
 df_students['messages_para_stuart'] = students_messages
 df_students['media_mensagens_por_dia_stuart'] = mean_messages_by_day
 
+#Plotar graficos
+print(df_students['messages_para_stuart'].describe())
+sns.distplot(df_students['messages_para_stuart'])
+
+print(df_students['media_mensagens_por_dia_stuart'].describe())
+sns.distplot(df_students['media_mensagens_por_dia_stuart'])
+
+sns.jointplot(data=df_students, x="messages_para_stuart", y="media_mensagens_por_dia_stuart")
+
+plt.figure(figsize=(20,10))
+sns.jointplot(data=df_students[df_students['deficiencia']!='Nenhuma'], x="messages_para_stuart", 
+              y="media_mensagens_por_dia_stuart", hue = 'deficiencia', height = 10)
+
